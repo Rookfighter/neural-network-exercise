@@ -1,0 +1,14 @@
+# Eclipse
+
+*.project
+*.cproject
+*.properties
+*.settings
+*.pydevproject
+*~
+*.swp
+*.orig
+
+# Python
+
+*.pyc
