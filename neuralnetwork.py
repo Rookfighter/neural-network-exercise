@@ -7,15 +7,16 @@ import random
 
 class neuron:
     def __init__(self, uid, weights, threshold):
-        self.__uid = uid
-        self.__weights = weights
-        self.__threshold = threshold
+        self.uid = uid
+        self.weights = weights
+        self.threshold = threshold
+        self.outval = 0
 
     def __net_func(self, invals):
-        return sum([w * v for w, v in zip(self.__weights, invals)])
+        return sum([w * v for w, v in zip(self.weights, invals)])
 
     def __activity_func(self, netval):
-        if netval >= self.__threshold:
+        if netval >= self.threshold:
             return 1
         else:
             return 0
@@ -30,14 +31,11 @@ class neuron:
         @param invals: vector of input values
         '''
 
-        assert(len(self.__weights) == len (invals))
+        assert(len(self.weights) == len (invals))
 
         netval = self.__net_func(invals)
         actval = self.__activity_func(netval)
-        self.__outval = self.__output_func(actval)
-
-    def outval(self):
-        return self.__outval
+        self.outval = self.__output_func(actval)
 
 
 class neural_network:
@@ -49,9 +47,9 @@ class neural_network:
         @param layer_count: amount of layers for the network
         '''
 
-        self.__neurons = []
-        self.__layers = [[] for _ in range(layer_count)]
-        self.__edges = {}
+        self.neurons = []
+        self.layers = [[] for _ in range(layer_count)]
+        self.edges = {}
 
     def create_neuron(self, layer, weights, threshold=0.5):
         '''
@@ -65,13 +63,13 @@ class neural_network:
         @return: uid of the created neuron
         '''
 
-        assert(layer >= 0 and layer < len(self.__layers))
+        assert(layer >= 0 and layer < len(self.layers))
 
-        uid = len(self.__neurons)
+        uid = len(self.neurons)
 
-        self.__neurons.append(neuron(uid, weights, threshold))
-        self.__layers[layer].append(uid)
-        self.__edges[uid] = []
+        self.neurons.append(neuron(uid, weights, threshold))
+        self.layers[layer].append(uid)
+        self.edges[uid] = []
 
         return uid
 
@@ -84,17 +82,17 @@ class neural_network:
         @param uid_b: uid of neuron B
         '''
 
-        assert(uid_a >= 0 and uid_a < len(self.__neurons))
-        assert(uid_b >= 0 and uid_b < len(self.__neurons))
+        assert(uid_a >= 0 and uid_a < len(self.neurons))
+        assert(uid_b >= 0 and uid_b < len(self.neurons))
 
-        self.__edges[uid_b].append(uid_a)
+        self.edges[uid_b].append(uid_a)
 
     def __update_layer(self, layer):
         # go through all neurons in this layer
         for uid in layer:
             # create input vector
-            invals = [self.__neurons[i].outval() for i in self.__edges[uid]]
-            self.__neurons[uid].update(invals)
+            invals = [self.neurons[i].outval for i in self.edges[uid]]
+            self.neurons[uid].update(invals)
 
     def update(self, invals):
         '''
@@ -106,19 +104,19 @@ class neural_network:
         @return: vector of output values
         '''
 
-        assert(self.__layers)
-        assert(len(invals) == len(self.__layers[0]))
+        assert(self.layers)
+        assert(len(invals) == len(self.layers[0]))
 
         # first layer = input layer
-        for uid in self.__layers[0]:
-            self.__neurons[uid].update(invals)
+        for uid in self.layers[0]:
+            self.neurons[uid].update(invals)
 
         # go through remaining _layers
-        for layer in self.__layers[1:]:
+        for layer in self.layers[1:]:
             self.__update_layer(layer)
 
         # return outVals of last layer = output layer
-        return [self.__neurons[uid].outval() for uid in self.__layers[-1]]
+        return [self.neurons[uid].outval for uid in self.layers[-1]]
 
 def rand_weights(n):
     return [ random.random() for _ in range(n)]
@@ -162,5 +160,3 @@ def train_network(network, filename):
     data = load_training_file(filename)
 
     # TODO implement delta learning here
-
-
