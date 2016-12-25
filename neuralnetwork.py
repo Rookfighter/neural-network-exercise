@@ -160,3 +160,53 @@ def train_network(network, filename):
     data = load_training_file(filename)
 
     # TODO implement delta learning here
+
+    # learnfac determines strength of learning effect
+    learnfac = 0.05
+
+    def train_delta_step():
+        '''
+        A single training step that goes through all data samples
+        and applies the delta learning rule.
+        '''
+        for sample in data:
+            outvals = network.update(sample[0])
+
+            assert(len(sample[1]) == len(outvals))
+            assert(len(network.layers[-1]) == len(outvals))
+            # iterate through all output neurons and their results
+            for exp, act, uid in zip(sample[1], outvals, network.layers[-1]):
+                # check if output is correct
+                if int(exp) == int(act):
+                    continue
+
+                neuron = network.neurons[uid]
+                # apply delta learning to neuron's weights
+                neuron.weights = [ w + learnfac * inval * (exp - act) \
+                                    for w, inval in \
+                                    zip(neuron.weights, sample[0]) ]
+
+    def check_train_results():
+        '''
+        Tests all datasamples against trained network and checks if
+        all results match the expected results.
+
+        @return: True if all results match the expected ones, else False
+        '''
+        for sample in data:
+            outvals = network.update(sample[0])
+
+            assert(len(sample[1]) == len(outvals))
+
+            # check for all output neurons if results
+            # match the expected result
+            for exp, act in zip(sample[1], outvals):
+                if int(exp) != int(act):
+                    return False
+
+        return True
+
+    while True:
+        train_delta_step()
+        if check_train_results():
+            break
