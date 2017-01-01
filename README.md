@@ -26,3 +26,6 @@ repeat
 until network test succeeds
 ```
 
+## Network
+
+![network](network_architecture.png)
